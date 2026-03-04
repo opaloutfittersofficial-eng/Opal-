@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opal Outfitters</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Poppins;
+background:#0f2e1c;
+color:white;
+}
+
+nav{
+display:flex;
+justify-content:space-between;
+padding:20px 40px;
+background:#123524;
+position:sticky;
+top:0;
+}
+
+nav h1{
+font-family:'Playfair Display';
+color:gold;
+}
+
+button{
+background:gold;
+border:none;
+padding:8px 15px;
+cursor:pointer;
+}
+
+.hero{
+height:80vh;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+text-align:center;
+background:#1b4332;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+padding:40px;
+}
+
+.card{
+background:#123524;
+padding:15px;
+border-radius:10px;
+transition:0.3s;
+}
+
+.card:hover{
+transform:scale(1.05);
+}
+
+.cart{
+position:fixed;
+right:0;
+top:0;
+width:300px;
+height:100%;
+background:#1b4332;
+padding:20px;
+overflow:auto;
+}
+
+input,textarea,select{
+width:100%;
+margin:8px 0;
+padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<h1>Opal Outfitters</h1>
+<button onclick="toggleCart()">Cart (<span id="cartCount">0</span>)</button>
+</nav>
+
+<section class="hero">
+<h2>Timeless Elegance. Eternal Style.</h2>
+<button onclick="scrollToShop()">Shop Now</button>
+</section>
+
+<section class="products" id="shop">
+<div class="card">
+<h3>Luxury Black Suit</h3>
+<p>$120</p>
+<button onclick="addToCart('Luxury Black Suit',120)">Add to Cart</button>
+</div>
+
+<div class="card">
+<h3>Elegant Green Dress</h3>
+<p>$95</p>
+<button onclick="addToCart('Elegant Green Dress',95)">Add to Cart</button>
+</div>
+</section>
+
+<div class="cart" id="cart" style="display:none;">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<h3>Total: $<span id="total">0</span></h3>
+
+<h3>Checkout</h3>
+<form id="orderForm">
+<input type="text" id="name" placeholder="Full Name" required>
+<input type="email" id="email" placeholder="Email" required>
+<input type="text" id="phone" placeholder="Phone" required>
+<textarea id="address" placeholder="Address" required></textarea>
+
+<select id="payment">
+<option>JazzCash</option>
+<option>Easypaisa</option>
+</select>
+
+<p>Send Payment To:</p>
+<p>JazzCash: 03XXXXXXXXX</p>
+<p>Easypaisa: 03XXXXXXXXX</p>
+
+<button type="submit">Place Order</button>
+</form>
+</div>
+
+<script>
+(function(){
+emailjs.init("YOUR_PUBLIC_KEY");
+})();
+
+let cart=[];
+
+function addToCart(name,price){
+cart.push({name,price});
+updateCart();
+}
+
+function updateCart(){
+let items="";
+let total=0;
+cart.forEach((item,index)=>{
+total+=item.price;
+items+=`<p>${item.name} - $${item.price}
+<button onclick="removeItem(${index})">X</button></p>`;
+});
+document.getElementById("cartItems").innerHTML=items;
+document.getElementById("total").innerText=total;
+document.getElementById("cartCount").innerText=cart.length;
+}
+
+function removeItem(index){
+cart.splice(index,1);
+updateCart();
+}
+
+function toggleCart(){
+let c=document.getElementById("cart");
+c.style.display=c.style.display==="none"?"block":"none";
+}
+
+function scrollToShop(){
+document.getElementById("shop").scrollIntoView();
+}
+
+document.getElementById("orderForm").addEventListener("submit",function(e){
+e.preventDefault();
+
+let total=document.getElementById("total").innerText;
+
+emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
+name:document.getElementById("name").value,
+email:document.getElementById("email").value,
+phone:document.getElementById("phone").value,
+address:document.getElementById("address").value,
+payment:document.getElementById("payment").value,
+order:JSON.stringify(cart),
+total:total,
+to_email:"opal.oufittersofficial@gmail.com"
+}).then(()=>{
+alert("Order Sent Successfully!");
+cart=[];
+updateCart();
+});
+});
+</script>
+
+</body>
+</html>
